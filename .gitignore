@@ -1,0 +1,11 @@
+# Ignore Next.js build output
+.next/
+
+# Ignore Node.js modules
+node_modules/
+
+# Ignore environment variables file
+.env*
+
+# Ignore development server logs
+npm-debug.log*
