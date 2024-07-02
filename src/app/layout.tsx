@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="light">
-      <body className={cn('min-h-screen font-sans antialiased group-aria-readonly:', inter.className)}>{children}</body>
+      <body className={cn('min-h-screen font-sans antialiased grainy', inter.className)}>{children}</body>
     </html>
   );
 }
