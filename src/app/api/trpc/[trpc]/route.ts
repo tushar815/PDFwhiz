@@ -1,8 +1,12 @@
-import { createNextApiHandler } from '@trpc/server/adapters/next';
-import {appRouter} from "@/trpc";
+import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
+import { appRouter } from '@/trpc'
 
-// @link https://nextjs.org/docs/api-routes/introduction
-export default createNextApiHandler({
-    router: appRouter,
-    createContext: ()=> ({})
-});
+const handler = (req: Request) =>
+    fetchRequestHandler({
+        endpoint: '/api/trpc',
+        req,
+        router: appRouter,
+        createContext: () => ({}),
+    })
+
+export { handler as GET, handler as POST }
