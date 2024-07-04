@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {procedure, router} from './trpc';
+import {privateProcedure, procedure, router} from './trpc';
 import {getKindeServerSession} from "@kinde-oss/kinde-auth-nextjs/server";
 import {TRPCError} from "@trpc/server";
 import {db} from "@/db";
@@ -31,6 +31,14 @@ export const appRouter = router({
             })
         }
         return {success: true, isLoading: true}
+    }),
+    getUserFiles: privateProcedure.query(async ({ctx}) => {
+        const {userId, user} = ctx;
+        return db.file.findMany({
+            where: {
+                userId
+            }
+        });
     })
 });
 
