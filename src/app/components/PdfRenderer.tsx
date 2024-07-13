@@ -3,17 +3,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import simpleBar from 'simplebar-react'
-import { ChevronDown, ChevronUp, Loader2, Search } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  RotateCw,
+  Search,
+} from "lucide-react";
 import { useState } from "react";
-import { useFormState } from "react-dom";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
-
 import { useResizeDetector } from "react-resize-detector";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SimpleBar from "simplebar-react";
+
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+import PdfFullScreen from "./PdfFullScreen";
 
 //pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -40,6 +44,9 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
   const [currPage, setCurrPage] = useState(1);
   const [scale, setScale] = useState(1);
   const { width, ref } = useResizeDetector();
+  const [rotation, setRotation] = useState(0);
+  const [renderedScale, setRenderedScale] = useState<number | null>(null);
+  const isLoading = renderedScale !== scale;
 
   const CustomPageValidator = z.object({
     page: z.string().refine((n) => Number(n) > 0 && Number(n) <= numPages!),
@@ -71,6 +78,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
           <Button
             onClick={() => {
               setCurrPage((p) => (p + 1 >= numPages! ? numPages! : p + 1));
+              setValue("page", String(currPage + 1));
             }}
             variant="ghost"
             aria-label="previous page"
@@ -82,7 +90,6 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
           <div className="flex items-center gap-1.5">
             <Input
               {...register("page")}
-              value={currPage}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleSubmit(handlePageSubmit)();
@@ -102,6 +109,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
             disabled={currPage <= 1}
             onClick={() => {
               setCurrPage((p) => (p - 1 > 1 ? p - 1 : 1));
+              setValue("page", String(currPage - 1));
             }}
           >
             <ChevronUp className="w-4 h-4" />
@@ -127,37 +135,73 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Button
+            variant="ghost"
+            aria-label="rotate 90 degree"
+            onClick={() => {
+              setRotation((prev) => {
+                return prev + 90;
+              });
+            }}
+          >
+            <RotateCw className="h-4 w-4" />
+          </Button>
+
+          <PdfFullScreen fileUrl={url} />
         </div>
       </div>
 
       <div className="flex-1 w-full max-h-screen">
-            <SimpleBar  autoHide={false} className="max-h-[calc(100vh - 10rem)]">
+        <SimpleBar autoHide={false} className="max-h-[calc(100vh - 10rem)]">
+          <div ref={ref}>
+            <Document
+              loading={
+                <div className="justify-center flex">
+                  <Loader2 className="my-24 h-6 w-6 animate-spin" />{" "}
+                </div>
+              }
+              onLoadError={() => {
+                toast({
+                  title: "Error loading pdf",
+                  description: "Please try again later.",
+                  variant: "destructive",
+                });
+              }}
+              onLoadSuccess={({ numPages }) => {
+                setNumPages(numPages);
+              }}
+              file={url}
+              className="max-h-full"
+            >
+              {isLoading && renderedScale ? (
+                <Page
+                  width={width ? width : 1}
+                  pageNumber={currPage}
+                  scale={scale}
+                  rotate={rotation}
+                  key={"@" + renderedScale}
+                />
+              ) : null}
 
-            
-        <div ref={ref}>
-          <Document
-            loading={
-              <div className="justify-center flex">
-                <Loader2 className="my-24 h-6 w-6 animate-spin" />{" "}
-              </div>
-            }
-            onLoadError={() => {
-              toast({
-                title: "Error loading pdf",
-                description: "Please try again later.",
-                variant: "destructive",
-              });
-            }}
-            onLoadSuccess={({ numPages }) => {
-              setNumPages(numPages);
-            }}
-            file={url}
-            className="max-h-full"
-          >
-            <Page width={width ? width : 1} pageNumber={currPage}
-            scale={scale} />
-          </Document>
-        </div>
+              <Page
+                className={cn(isLoading ? "hidden" : "")}
+                width={width ? width : 1}
+                pageNumber={currPage}
+                scale={scale}
+                rotate={rotation}
+                loading={
+                  <div className="flex justify-center">
+                    <Loader2 className="my-24 h-6 w-6 animate-spin" />
+                  </div>
+                }
+                key={"@" + scale}
+                onRenderSuccess={() => {
+                  setRenderedScale(scale);
+                }}
+              />
+            </Document>
+          </div>
         </SimpleBar>
       </div>
     </div>
