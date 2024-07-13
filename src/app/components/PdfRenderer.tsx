@@ -3,20 +3,27 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import simpleBar from 'simplebar-react'
+import { ChevronDown, ChevronUp, Loader2, Search } from "lucide-react";
 import { useState } from "react";
 import { useFormState } from "react-dom";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useForm } from "react-hook-form";
-import {zodResolver} from '@hookform/resolvers/zod'
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
 import { useResizeDetector } from "react-resize-detector";
 import { z } from "zod";
-import page from "../dashboard/[fileid]/page";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import SimpleBar from "simplebar-react";
 
 //pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -31,26 +38,30 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
   const { toast } = useToast();
   const [numPages, setNumPages] = useState<number>();
   const [currPage, setCurrPage] = useState(1);
+  const [scale, setScale] = useState(1);
   const { width, ref } = useResizeDetector();
-
 
   const CustomPageValidator = z.object({
     page: z.string().refine((n) => Number(n) > 0 && Number(n) <= numPages!),
   });
 
-  type TCustomPageValidator  = z.infer<typeof CustomPageValidator>
+  type TCustomPageValidator = z.infer<typeof CustomPageValidator>;
 
-  const handlePageSubmit = ({
-    page, 
-  }: TCustomPageValidator) => {
-    setCurrPage(Number(page))
-    setValue("page", String(page))
-  }
-  
-  const {register , handleSubmit, formState: {errors}, setValue} = useForm<TCustomPageValidator>({
+  const handlePageSubmit = ({ page }: TCustomPageValidator) => {
+    setCurrPage(Number(page));
+    setValue("page", String(page));
+  };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<TCustomPageValidator>({
     defaultValues: {
-      page: '1'
-    }, resolver: zodResolver(CustomPageValidator)
+      page: "1",
+    },
+    resolver: zodResolver(CustomPageValidator),
   });
 
   return (
@@ -69,15 +80,16 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
           </Button>
 
           <div className="flex items-center gap-1.5">
-            <Input  
-            {...register("page")}
-            value={currPage}
-            onKeyDown={(e) => {
-             if(e.key === 'Enter'){
-              handleSubmit(handlePageSubmit)()
-             }
-            }}
-            className={cn("w-12 h-8", errors.page && "outline-red-500")}/>
+            <Input
+              {...register("page")}
+              value={currPage}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit(handlePageSubmit)();
+                }
+              }}
+              className={cn("w-12 h-8", errors.page && "outline-red-500")}
+            />
             <p className="Text-zinc-700 text-sm space-x-1">
               <span>/</span>
               <span>{numPages ?? "x"} </span>
@@ -95,9 +107,33 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
             <ChevronUp className="w-4 h-4" />
           </Button>
         </div>
+        <div className="space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="gap-1.5" aria-label="zoom" variant="ghost">
+                <Search className="h-4 w-4" />
+                {scale * 100}% <ChevronDown className="h-3 w-3 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onSelect={() => setScale(1)}>
+                100%
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setScale(1.5)}>
+                150%
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setScale(2)}>
+                200%
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <div className="flex-1 w-full max-h-screen">
+            <SimpleBar  autoHide={false} className="max-h-[calc(100vh - 10rem)]">
+
+            
         <div ref={ref}>
           <Document
             loading={
@@ -118,9 +154,11 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
             file={url}
             className="max-h-full"
           >
-            <Page width={width ? width : 1} pageNumber={currPage} />
+            <Page width={width ? width : 1} pageNumber={currPage}
+            scale={scale} />
           </Document>
         </div>
+        </SimpleBar>
       </div>
     </div>
   );
