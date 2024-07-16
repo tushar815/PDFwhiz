@@ -73,7 +73,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
 
   return (
     <div className="w-full bg-white rounded-md shadow flex flex-col items-center">
-      <div className="h-14 w-full border-b border-r-zinc-200 flex items-center justify-between px-2">
+      <div className="h-14 w-full border-b border-zinc-200 flex items-center justify-between px-2">
         <div className="flex items-center gap-1.5">
           <Button
             onClick={() => {
@@ -153,12 +153,12 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
       </div>
 
       <div className="flex-1 w-full max-h-screen">
-        <SimpleBar autoHide={false} className="max-h-[calc(100vh - 10rem)]">
+        <SimpleBar autoHide={false} className="max-h-[calc(100vh-10rem)]">
           <div ref={ref}>
             <Document
               loading={
                 <div className="justify-center flex">
-                  <Loader2 className="my-24 h-6 w-6 animate-spin" />{" "}
+                  <Loader2 className="my-24 h-6 w-6 animate-spin" />
                 </div>
               }
               onLoadError={() => {
