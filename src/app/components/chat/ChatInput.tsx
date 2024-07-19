@@ -18,7 +18,7 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
                 rows={1}
                 maxRows={4}
                 autoFocus
-                placeholder="Enter your Question..."
+                placeholder="Enter your Question...."
               />
               <Button className="absolute bottom-1.5 right-[8px]" aria-label="send message" ><Send className="h-4 w-4" /></Button>
             </div>
