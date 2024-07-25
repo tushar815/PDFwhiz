@@ -54,6 +54,14 @@ export const ourFileRouter = {
           namespace: createdFile.id,
         });
 
+        const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+          pineconeIndex,
+          namespace: createdFile.id
+        })
+
+        
+      
+
         await db.file.update({
           data: {
             uploadStatus: "SUCCESS",
