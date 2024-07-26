@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { db } from "@/db";
 import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
 
+
 export const appRouter = router({
   authCallback: procedure.query(async () => {
     console.log("CALLED THE APIIIII");
@@ -79,6 +80,7 @@ export const appRouter = router({
 
       return file;
     }),
+
   getFileUploadStatus: privateProcedure
     .input(z.object({ fileId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -89,13 +91,14 @@ export const appRouter = router({
         },
       });
 
-      if (!file) return { status: "PENDING" as const };
+      if (!file) return { status: 'PENDING' as const }
 
       return {
-        status: file.uploadStatus,
+        status: file.uploadStatus
       };
     }),
-  getFileMessages: privateProcedure
+ 
+    getFileMessages: privateProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).nullish(),

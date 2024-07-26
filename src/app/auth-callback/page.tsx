@@ -19,7 +19,7 @@ const Page = () => {
 
      */
     const {data, error} = trpc.authCallback.useQuery(undefined, {
-
+    
         // retry: true,
         // retryDelay: 500,
     });
