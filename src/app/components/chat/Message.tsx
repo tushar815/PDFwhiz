@@ -50,22 +50,23 @@ const Message = ({ message, isNextMessageSamePerson }: MessageProps) => {
         >
           {typeof message.text === "string" ? (
             <ReactMarkdown
-              className={cn("pros", {
+              className={cn("prose", {
                 "text-zinc-50": message.isUserMessage,
               })}
-            ></ReactMarkdown>
+            >{message.text}</ReactMarkdown>
           ) : (
             message.text
           )}
-          {message.id !== 'loading-message' ? (
-            <div className={cn('text-xs select-none mt-2 w-full text-right', {
-                'text-zinc-500':!message.isUserMessage,
-                'text-red-300': message.isUserMessage
-            })}>
-                    {format(new Date(message.createdAt), 'HH:mm')}
-
+          {message.id !== "loading-message" ? (
+            <div
+              className={cn("text-xs select-none mt-2 w-full text-right", {
+                "text-zinc-500": !message.isUserMessage,
+                "text-red-300": message.isUserMessage,
+              })}
+            >
+              {format(new Date(message.createdAt), "HH:mm")}
             </div>
-          ): null}
+          ) : null}
         </div>
       </div>
     </div>

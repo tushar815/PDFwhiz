@@ -19,6 +19,8 @@ const {data, isLoading, fetchNextPage} = trpc.getFileMessages.useInfiniteQuery({
 
 const messages = data?.pages.flatMap((page) => page.messages)
 
+console.log('Messages', messages);
+
 const loadingMessage = {
   id: 'loading-message',
   createdAt: new Date().toISOString(),
