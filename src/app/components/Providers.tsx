@@ -9,7 +9,7 @@ const Providers = ({children}: PropsWithChildren) => {
     const [queryClient] = useState(() => new QueryClient())
     const [trpcClient] = useState(() => trpc.createClient({
         links: [httpBatchLink({
-            url: 'http://localhost:3000/api/trpc',
+            url: `${process.env.TRPC_PORT}/api/trpc`,
         }),
         ],
     }))
