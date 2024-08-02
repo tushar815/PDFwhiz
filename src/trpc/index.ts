@@ -4,7 +4,9 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db";
 import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
-
+import { absoluteUrl } from "@/lib/utils";
+import { getUserSubscriptionPlan, stripe } from "@/lib/stripe";
+import { PLANS } from "@/config/stripe";
 
 export const appRouter = router({
   authCallback: procedure.query(async () => {
@@ -91,14 +93,14 @@ export const appRouter = router({
         },
       });
 
-      if (!file) return { status: 'PENDING' as const }
+      if (!file) return { status: "PENDING" as const };
 
       return {
-        status: file.uploadStatus
+        status: file.uploadStatus,
       };
     }),
- 
-    getFileMessages: privateProcedure
+
+  getFileMessages: privateProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).nullish(),
@@ -148,6 +150,51 @@ export const appRouter = router({
         nextCursor,
       };
     }),
+  createStripeSession: privateProcedure.mutation(async ({ ctx }) => {
+    const { userId } = ctx;
+
+    const billingUrl = absoluteUrl("/dashboard/billing");
+
+    if (!userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+    const dbUser = await db.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!dbUser) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+    const subscriptionPlan = await getUserSubscriptionPlan();
+
+    if (subscriptionPlan.isSubscribed && dbUser.stripeCustomerId) {
+      const stripeSesson = await stripe.billingPortal.sessions.create({
+        customer: dbUser.stripeCustomerId,
+        return_url: billingUrl,
+      });
+      return {
+        url: stripeSesson.url,
+      };
+    }
+    const stripeSesson = await stripe.checkout.sessions.create({
+      success_url: billingUrl,
+      cancel_url: billingUrl,
+      payment_method_types: ['card'],
+      mode: "subscription",
+      billing_address_collection: "auto",
+      line_items: [
+        {
+          price: PLANS.find((p) => p.name === "pro")?.price.priceIds.test,
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        userId: userId,
+      },
+    });
+
+    return { url: stripeSesson.url };
+  }),
 });
 
 // export type definition of API
