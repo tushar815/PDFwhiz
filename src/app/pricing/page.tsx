@@ -89,7 +89,7 @@ const page = async () => {
                   .amount || 0;
 
               return (
-                <div
+                <div key={plan}
                   className={cn("relative rounded-2xl bg-white shadow-lg", {
                     "border-2 border-red-600 shadow-red-200": plan === "Pro",
                     "border border-gray-200": plan !== "Pro",
@@ -119,7 +119,7 @@ const page = async () => {
                           <HelpCircle className="h-4 w-4  text-zinc-500" />
                         </TooltipTrigger>
                         <TooltipContent className="w-80 p-2">
-                          How many PDF's you can upload a month.
+                          How many PDFs you can upload a month.
                         </TooltipContent>
                       </Tooltip>
                     </div>
