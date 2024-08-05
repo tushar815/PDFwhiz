@@ -75,7 +75,7 @@ const Dashboard = ({subscriptionPlan}:pageProps) => {
                                     {/*Messages on file*/}
                                     <div className='flex items-center gap-2'>
                                         <MessageSquare className='h-4 w-4'/>
-                                        mocked
+                                        
                                     </div>
                                     {/*    Delete file*/}
                                     <Button size='sm' className='w-full' variant='destructive'

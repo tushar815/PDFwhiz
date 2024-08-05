@@ -86,7 +86,7 @@ export const appRouter = router({
   getFileUploadStatus: privateProcedure
     .input(z.object({ fileId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const file = await db.file.findFirst({
+      let file = await db.file.findFirst({
         where: {
           id: input.fileId,
           userId: ctx.userId,
@@ -94,6 +94,21 @@ export const appRouter = router({
       });
 
       if (!file) return { status: "PENDING" as const };
+
+
+      const subscriptionPlan = await getUserSubscriptionPlan();
+      if(subscriptionPlan.isSubscribed && file.uploadStatus === 'FAILED'){
+       file = await db.file.update({
+          data:{
+            uploadStatus: 'SUCCESS'
+            
+          },
+          where:{
+            id: input.fileId
+          }
+        })
+      }
+
 
       return {
         status: file.uploadStatus,
