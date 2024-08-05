@@ -1,18 +1,20 @@
+import { hostname } from "os";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async redirects() {
     return [
       {
         source: "/sign-in",
-        destination: "/api/auth/login", 
-        permanent: true
+        destination: "/api/auth/login",
+        permanent: true,
       },
       {
         source: "/sign-up",
-        destination: "/api/auth/register", 
-        permanent: true
+        destination: "/api/auth/register",
+        permanent: true,
       },
-    ]
+    ];
   },
 
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
@@ -24,8 +26,12 @@ const nextConfig = {
     missingSuspenseWithCSRBailout: false,
   },
   images: {
-    domains: ['gravatar.com']
-  }
+    remotePatterns: [
+      {
+        hostname: "gravatar.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
